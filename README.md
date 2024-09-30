@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="LLM" width="60%" alt="SSC-PLATESCHECKER-logo">
-</p>
+
 <p align="center">
     <h1 align="center">ATEMs</h1>
 </p>
@@ -14,7 +12,7 @@
 	<img src="https://img.shields.io/github/languages/count/keyframesfound/ssc-plateschecker?style=flat&color=f9f9ff" alt="repo-language-count">
 </p>
 <p align="center">
-		<em>Built for St Stephen's College Campus Traffic During Large Scale Events:</em>
+		<em>Built for SSC Campus Traffic During Large Scale Events:</em>
 </p>
 <p align="center">
 	<img src="https://img.shields.io/badge/Python-3776AB.svg?style=flat&logo=Python&logoColor=white" alt="Python">
