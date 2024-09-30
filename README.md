@@ -3,19 +3,15 @@
     <h1 align="center">ATEMs</h1>
 </p>
 <p align="center">
-    <em><code>❯Automated Traffic Event Management System</code></em>
-</p>
-<p align="center">
-	<img src="https://img.shields.io/github/license/keyframesfound/ssc-plateschecker?style=flat&logo=opensourceinitiative&logoColor=white&color=f9f9ff" alt="license">
-	<img src="https://img.shields.io/github/last-commit/keyframesfound/ssc-plateschecker?style=flat&logo=git&logoColor=white&color=f9f9ff" alt="last-commit">
-	<img src="https://img.shields.io/github/languages/top/keyframesfound/ssc-plateschecker?style=flat&color=f9f9ff" alt="repo-top-language">
-	<img src="https://img.shields.io/github/languages/count/keyframesfound/ssc-plateschecker?style=flat&color=f9f9ff" alt="repo-language-count">
-</p>
+    <h3 align="center"><code>Automated Traffic Event Management System</code></h3>
+  <p align="center">
+   <img src="https://img.shields.io/badge/Markdown-000000.svg?style=for-the-badge&logo=Markdown&logoColor=white" alt="Markdown" />
+   <img src="https://img.shields.io/badge/Python-3776AB.svg?style=for-the-badge&logo=Python&logoColor=white" alt="Python" />
+   <img src="https://img.shields.io/badge/GNU%20Bash-4EAA25.svg?style=for-the-badge&logo=GNU-Bash&logoColor=white" alt="Bash" />
+   <img src="https://img.shields.io/badge/Anaconda-44A833.svg?style=for-the-badge&logo=Anaconda&logoColor=white" alt="Anaconda" />
+ </p>
 <p align="center">
 		<em>Built for SSC Campus Traffic During Large Scale Events:</em>
-</p>
-<p align="center">
-	<img src="https://img.shields.io/badge/Python-3776AB.svg?style=flat&logo=Python&logoColor=white" alt="Python">
 </p>
 
 <br>
