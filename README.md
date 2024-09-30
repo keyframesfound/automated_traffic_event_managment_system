@@ -59,6 +59,7 @@ Displays the video stream with the detected license plates highlighted and the e
 └── ssc-plateschecker/
     ├── Main.py
     ├── README.md
+    ├── LICENSE
     └── requirements.txt
 
 ```
