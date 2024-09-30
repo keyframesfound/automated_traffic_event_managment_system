@@ -1,78 +1,62 @@
 import cv2
 import numpy as np
-from ultralytics import YOLO
 import pytesseract
-import threading
 
-# Set the path to the Tesseract executable
-pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
+# Function to get the available camera sources
+def get_camera_sources():
+    camera_sources = []
+    for i in range(10):
+        cap = cv2.VideoCapture(i)
+        if cap.isOpened():
+            camera_sources.append(i)
+            cap.release()
+    return camera_sources
 
-# Load the YOLOv8 model
-model = YOLO('yolov8n.pt')
+# Function to start the license plate detection and reading
+def start_license_plate_detection(camera_source):
+    plat_detector = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_russian_plate_number.xml")
+    video = cv2.VideoCapture(camera_source)
 
-# Initialize the video capture
-cap = cv2.VideoCapture(0)
+    if not video.isOpened():
+        print('Error Reading Video')
+        return
 
-def recognize_number_plate(img):
-    """
-    Recognize the license plate number from the input image using Tesseract OCR.
-    """
-    # Convert the image to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-    # Apply image preprocessing (e.g., thresholding, noise removal)
-    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-    
-    # Use Tesseract OCR to extract the license plate number
-    license_plate = pytesseract.image_to_string(thresh, lang='eng', config='--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-    
-    # Clean up the extracted text
-    license_plate = ''.join(c for c in license_plate if c.isalnum())
-    return license_plate.upper()
+    while True:
+        ret, frame = video.read()
+        gray_video = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        plate = plat_detector.detectMultiScale(gray_video, scaleFactor=1.2, minNeighbors=5, minSize=(25, 25))
 
-def process_frame(frame):
-    # Perform object detection using YOLOv8
-    results = model(frame)[0]
-    
-    # Iterate over the detected objects
-    for result in results.boxes.data:
-        # Get the bounding box coordinates
-        x1, y1, x2, y2 = int(result[0]), int(result[1]), int(result[2]), int(result[3])
-        
-        # Get the class ID and confidence score
-        class_id = int(result[5])
-        confidence = result[4]
-        
-        # Check if the detected object is a car
-        if class_id == 2:  # Car class ID
-            # Crop the number plate region
-            number_plate = frame[y1:y2, x1:x2]
-            
-            # Perform number plate recognition
-            license_plate = recognize_number_plate(number_plate)
-            
-            # Draw the bounding box and display the license plate
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv2.putText(frame, license_plate, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
-    
-    return frame
+        for (x, y, w, h) in plate:
+            license_plate = frame[y:y + h, x:x + w]
+            license_plate_text = pytesseract.image_to_string(license_plate, lang='eng')
+            license_plate_text = ''.join(c for c in license_plate_text if c.isalnum())
 
-while True:
-    # Capture a frame from the webcam
-    ret, frame = cap.read()
-    
-    # Process the frame using a separate thread
-    thread = threading.Thread(target=process_frame, args=(frame,))
-    thread.start()
-    thread.join()
-    
-    # Display the frame
-    cv2.imshow('Car Number Plate Recognition', frame)
-    
-    # Press 'q' to exit the loop
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            frame[y:y + h, x:x + w] = cv2.blur(frame[y:y + h, x:x + w], ksize=(10, 10))
+            cv2.putText(frame, text=license_plate_text, org=(x - 3, y - 3), fontFace=cv2.FONT_HERSHEY_COMPLEX, color=(0, 0, 255), thickness=1, fontScale=0.6)
 
-# Release the video capture and close all windows
-cap.release()
-cv2.destroyAllWindows()
+        if ret == True:
+            cv2.imshow('Video', frame)
+
+            if cv2.waitKey(25) & 0xFF == ord("q"):
+                break
+        else:
+            break
+
+    video.release()
+    cv2.destroyAllWindows()
+
+# Main function
+if __name__ == "__main__":
+    # Install Tesseract OCR engine
+    pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
+
+    # Get the available camera sources
+    camera_sources = get_camera_sources()
+    print("Available camera sources:", camera_sources)
+
+    # Prompt the user to choose a camera source
+    camera_choice = int(input("Enter the camera source number (0-{})?: ".format(len(camera_sources) - 1)))
+
+    # Start the license plate detection and reading
+    start_license_plate_detection(camera_sources[camera_choice])
