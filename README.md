@@ -33,19 +33,18 @@
 
 ## 📍 Overview
 
-<code>❯ License Plate Detection and Reading
-Originally, this project was aimed at helping solve the ongoing traffic management issue we face during events, requiring lots of people to stand in the heat for hours at a time to direct traffic. Through this project, we hope to solve 3 major issues: 1 identifying cars between staff members and outside guests, two effectively managing campus traffic, and three making the whole system remote and requiring only two on-site operators. While this sounds like a very difficult and complicated endeavour, our team is confident in our skills and hopes to, through this project, contribute & finally solve this problem.  </code>
+License Plate Detection and Reading
+Originally, this project was aimed at helping solve the ongoing traffic management issue we face during events, requiring lots of people to stand in the heat for hours at a time to direct traffic. Through this project, we hope to solve 3 major issues: 1 identifying cars between staff members and outside guests, two effectively managing campus traffic, and three making the whole system remote and requiring only two on-site operators. While this sounds like a very difficult and complicated endeavour, our team is confident in our skills and hopes to, through this project, contribute & finally solve this problem.
 
 ---
 
 ## 👾 Features
 
-<code>❯ 
 Automatically detects available camera sources on the system.
 Allows the user to select a camera source for license plate detection.
 Utilizes the Haar Cascade classifier for Russian license plate detection.
 Extracts the text from the detected license plates using the Tesseract OCR engine.
-Displays the video stream with the detected license plates highlighted and the extracted text displayed</code>
+Displays the video stream with the detected license plates highlighted and the extracted text displayed.
 
 ---
 
