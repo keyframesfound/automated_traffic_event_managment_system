@@ -51,7 +51,7 @@ Displays the video stream with the detected license plates highlighted and the e
 ## 📂 Repository Structure
 
 ```sh
-└── ssc-plateschecker/
+└── automated_traffic_event_managment_system/
     ├── Main.py
     ├── README.md
     ├── LICENSE
@@ -72,14 +72,14 @@ Displays the video stream with the detected license plates highlighted and the e
 
 Build the project from source:
 
-1. Clone the ssc-plateschecker repository:
+1. Clone the automated_traffic_event_managment_system repository:
 ```sh
 ❯ git clone https://github.com/keyframesfound/automated_traffic_event_managment_system
 ```
 
 2. Navigate to the project directory:
 ```sh
-❯ cd ssc-plateschecker
+❯ cd automated_traffic_event_managment_system
 ```
 
 3. Install the required dependencies:
