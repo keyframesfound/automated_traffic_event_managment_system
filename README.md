@@ -74,7 +74,7 @@ Build the project from source:
 
 1. Clone the ssc-plateschecker repository:
 ```sh
-❯ git clone https://github.com/keyframesfound/ssc-plateschecker
+❯ git clone https://github.com/keyframesfound/automated_traffic_event_managment_system
 ```
 
 2. Navigate to the project directory:
