@@ -67,7 +67,7 @@ def start_license_plate_detection(camera_source, record_video):
         out.release()
     cv2.destroyAllWindows()
 
-# Main function
+# OCR Engine
 if __name__ == "__main__":
     # Install Tesseract OCR engine
     pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
