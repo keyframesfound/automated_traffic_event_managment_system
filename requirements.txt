@@ -1,3 +1,2 @@
 opencv-python==4.5.5.64
-numpy==1.21.6
-pytesseract==0.3.10
+inference-sdk==0.2.1
