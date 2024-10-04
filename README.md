@@ -66,7 +66,7 @@ Displays the video stream with the detected license plates highlighted and the e
 
 ### 🔖 Prerequisites
 
-**Python**: `version 3.12.3`
+**Python**: `version 3.8.20`
 
 ### 📦 Installation
 
