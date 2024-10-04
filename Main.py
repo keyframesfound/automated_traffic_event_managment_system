@@ -1,62 +1,74 @@
 import cv2
-import numpy as np
-import pytesseract
+from inference_sdk import InferenceHTTPClient
+import time
 
-# Function to get the available camera sources
-def get_camera_sources():
-    camera_sources = []
-    for i in range(10):
-        cap = cv2.VideoCapture(i)
-        if cap.isOpened():
-            camera_sources.append(i)
-            cap.release()
-    return camera_sources
+# Prompt the user to select the camera source
+camera_index = int(input("Enter the camera index (e.g., 0 for the default camera): "))
 
-# Function to start the license plate detection and reading
-def start_license_plate_detection(camera_source):
-    plat_detector = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_russian_plate_number.xml")
-    video = cv2.VideoCapture(camera_source)
+# Initialize the camera
+cap = cv2.VideoCapture(camera_index)
 
-    if not video.isOpened():
-        print('Error Reading Video')
-        return
+CLIENT = InferenceHTTPClient(
+    api_url="https://detect.roboflow.com",
+    api_key="API KEY"
+)
 
-    while True:
-        ret, frame = video.read()
-        gray_video = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        plate = plat_detector.detectMultiScale(gray_video, scaleFactor=1.2, minNeighbors=5, minSize=(25, 25))
+running = True
+prev_time = 0
+while running:
+    # Capture a frame from the camera
+    ret, frame = cap.read()
 
-        for (x, y, w, h) in plate:
-            license_plate = frame[y:y + h, x:x + w]
-            license_plate_text = pytesseract.image_to_string(license_plate, lang='eng')
-            license_plate_text = ''.join(c for c in license_plate_text if c.isalnum())
+    if ret:
+        # Perform object detection on the frame
+        response = CLIENT.infer(frame, model_id="license-plate-recognition-rxg4e/4")
+        
+        # Extract the detections from the response
+        detections = response.get("predictions", [])
 
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            frame[y:y + h, x:x + w] = cv2.blur(frame[y:y + h, x:x + w], ksize=(10, 10))
-            cv2.putText(frame, text=license_plate_text, org=(x - 3, y - 3), fontFace=cv2.FONT_HERSHEY_COMPLEX, color=(0, 0, 255), thickness=1, fontScale=0.6)
+        # Calculate the current FPS
+        curr_time = time.time()
+        fps = 1 / (curr_time - prev_time)
+        prev_time = curr_time
 
-        if ret == True:
-            cv2.imshow('Video', frame)
+        # Draw bounding boxes, display confidence scores, and FPS
+        for detection in detections:
+            x, y, w, h = detection["x"], detection["y"], detection["width"], detection["height"]
+            class_id = detection["class_id"]
+            confidence = detection["confidence"] * 100
+            
+            # Lookup the class name based on the class_id
+            class_names = {0: "License Plate"}
+            label = class_names.get(class_id, "Unknown")
+            
+            # Adjust the bounding box coordinates to center it on the detection
+            x = int(x - w / 2)
+            y = int(y - h / 2)
+            w = int(w)
+            h = int(h)
+            
+            # Draw the bounding box
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            
+            # Display the label and confidence score
+            text = f"{label}: {confidence:.2f}%"
+            cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-            if cv2.waitKey(25) & 0xFF == ord("q"):
-                break
-        else:
-            break
+        # Display the FPS
+        fps_text = f"FPS: {fps:.2f}"
+        cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
-    video.release()
-    cv2.destroyAllWindows()
+        # Display the frame
+        cv2.imshow("License Plate Detection", frame)
 
-# Main function
-if __name__ == "__main__":
-    # Install Tesseract OCR engine
-    pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
+        # Check for user input
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
+            running = False
 
-    # Get the available camera sources
-    camera_sources = get_camera_sources()
-    print("Available camera sources:", camera_sources)
+    # Limit the frame rate to improve performance
+    time.sleep(0.01)
 
-    # Prompt the user to choose a camera source
-    camera_choice = int(input("Enter the camera source number (0-{})?: ".format(len(camera_sources) - 1)))
-
-    # Start the license plate detection and reading
-    start_license_plate_detection(camera_sources[camera_choice])
+# Release the camera and close the window
+cap.release()
+cv2.destroyAllWindows()
