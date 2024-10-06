@@ -17,7 +17,7 @@ CLIENT = InferenceHTTPClient(
 )
 
 # Set up the thread pool for asynchronous API calls
-executor = ThreadPoolExecutor(max_workers=8)
+executor = ThreadPoolExecutor(max_workers=2)
 
 # Read the authorized license plates from a CSV file
 authorized_plates = ["LICENSE", "LICENSE", "LICENSE"]
