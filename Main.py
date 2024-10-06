@@ -13,14 +13,14 @@ cap = cv2.VideoCapture(camera_index)
 
 CLIENT = InferenceHTTPClient(
     api_url="https://detect.roboflow.com",
-    api_key="API Key"
+    api_key="API KEY"
 )
 
 # Set up the thread pool for asynchronous API calls
 executor = ThreadPoolExecutor(max_workers=8)
 
 # Read the authorized license plates from a CSV file
-authorized_plates = ["License", "License", "License", "License", "License", "License]
+authorized_plates = ["LICENSE", "LICENSE", "LICENSE"]
 
 running = True
 frame_count = 0
