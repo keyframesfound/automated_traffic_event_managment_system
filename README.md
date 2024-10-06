@@ -74,17 +74,17 @@ Build the project from source:
 
 1. Clone the automated_traffic_event_managment_system repository:
 ```sh
-❯ git clone https://github.com/keyframesfound/automated_traffic_event_managment_system
+git clone https://github.com/keyframesfound/automated_traffic_event_managment_system
 ```
 
 2. Navigate to the project directory:
 ```sh
-❯ cd automated_traffic_event_managment_system
+cd automated_traffic_event_managment_system
 ```
 
 3. Install the required dependencies:
 ```sh
-❯ pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 ### 🤖 Usage
@@ -92,7 +92,7 @@ Build the project from source:
 To run the project, execute the following command:
 
 ```sh
-❯ python main.py
+python main.py
 ```
 ---
 
