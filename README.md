@@ -82,19 +82,25 @@ git clone https://github.com/keyframesfound/automated_traffic_event_managment_sy
 cd automated_traffic_event_managment_system
 ```
 
-3. Install the required dependencies:
+2.1 For Linux Installations Only:
+```sh
+source myenv/bin/activate
+```
+
+4. Install the required dependencies:
 ```sh
 pip install -r requirements.txt
 ```
 
-### 🤖 Usage
+### 🤖 Run the script
 
 To run the project, execute the following command:
 
 ```sh
-python main.py
+python3 main.py
 ```
 ---
+
 
 ## 📌 Project Roadmap
 
