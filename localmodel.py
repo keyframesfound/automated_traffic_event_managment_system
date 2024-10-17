@@ -1,69 +1,118 @@
+from roboflow import Roboflow
 import cv2
+from concurrent.futures import ThreadPoolExecutor
 import pytesseract
+import time
 
-# Load the license plate detection model
-net = cv2.dnn.readNetFromONNX('/Users/ryanyeung/miniconda3/pkgs/libopencv-4.10.0-headless_py38h1ed5c01_3/share/opencv4/haarcascades/haarcascade_license_plate_rus_16stages.xml')
+# Prompt the user to select the camera index
+camera_index = int(input("Enter the camera index (e.g., 0 for the default camera): "))
 
-# Function to detect and read license plate
-def read_license_plate(frame):
-    # Create a blob from the frame
-    blob = cv2.dnn.blobFromImage(frame, scalefactor=1/255.0, size=(224, 224), mean=(0, 0, 0), swapRB=True, crop=False)
+# Initialize the camera
+cap = cv2.VideoCapture(camera_index)
 
-    # Pass the blob through the license plate detection model
-    net.setInput(blob)
-    outputs = net.forward()
+# Set up Roboflow
+rf = Roboflow(api_key="u7DLC0ZfVDyLXmbYFpQI")
+project = rf.workspace().project("license-plate-recognition-rxg4e")
+model = project.version("4").model  # Use the higher-resolution model version
 
-    # Extract the license plate region
-    for output in outputs:
-        x, y, width, height = output[:4]
-        x, y, width, height = int(x * frame.shape[1]), int(y * frame.shape[0]), int(width * frame.shape[1]), int(height * frame.shape[0])
-        plate_region = frame[y:y+height, x:x+width]
+# Set up the thread pool for asynchronous API calls
+executor = ThreadPoolExecutor(max_workers=2)
 
-        # Use Tesseract OCR to read the license plate
-        text = pytesseract.image_to_string(plate_region, lang='eng', config='--psm 6')
+# Read the authorized license plates from a CSV file
+authorized_plates = ["LICENSE123", "ABC123", "DEF456"]
 
-        # Extract the license plate number
-        license_plate = ''.join(char for char in text if char.isalnum())
+running = True
+frame_count = 0
+start_time = time.time()
+prev_time = start_time
+fps = 0.0  # Initialize the fps variable
 
-        if license_plate:
-            return license_plate
+while running:
+    # Capture a single frame from the camera
+    ret, frame = cap.read()
+    if not ret:
+        break
 
-    return None
+    try:
+        results = model.predict(frame, confidence=0.7, overlap=0.4)
+        detections = results.json()['predictions']
+    except Exception as e:
+        print(f"Error: {e}")
+        continue
 
-# Function to get camera source
-def get_camera_source():
-    # (Same as before)
+    # Process the inference results
+    for detection in detections:
+        x1, y1, x2, y2 = detection['x'], detection['y'], detection['width'] + detection['x'], detection['height'] + detection['y']
 
-# Main function
-def main():
-    # Get camera source
-    camera_source = get_camera_source()
+        # Calculate the aspect ratio of a typical license plate (approximately 3:1)
+        plate_width = x2 - x1
+        plate_height = plate_width / 3
 
-    # Open the camera or video source
-    cap = cv2.VideoCapture(camera_source)
+        # Adjust the bounding box coordinates to better fit the license plate region
+        x1 = max(0, int(x1 - 0.4 * plate_width))
+        y1 = max(0, int(y1 - 0.5 * plate_height))
+        x2 = min(frame.shape[1], int(x2 + 0.2 * plate_width))
+        y2 = min(frame.shape[0], int(y1 + 1.2 * plate_height))
 
-    while True:
-        # Read a frame from the camera
-        ret, frame = cap.read()
+        # Extract the license plate region
+        license_plate = frame[int(y1):int(y2), int(x1):int(x2)]
 
-        if ret:
-            # Detect and read the license plate
-            license_plate = read_license_plate(frame)
+        try:
+            # Perform OCR on the license plate region using Tesseract
+            license_plate_text = pytesseract.image_to_string(license_plate, config='--oem 3 --psm 6')
+            license_plate_text = license_plate_text.strip().upper().replace(" ", "")
 
-            if license_plate:
-                # Display the license plate number
-                print("License plate:", license_plate)
+            # Check if the license plate contains at least 4 out of the 5 characters in any of the authorized plates (ignoring '?' characters)
+            is_authorized = any(sum(1 for char in authorized_plate if char != '?' and char in license_plate_text.replace('?', '')) >= 4 for authorized_plate in authorized_plates)
 
-            # Display the frame
-            cv2.imshow("License Plate Recognition", frame)
+            # Determine the gate status based on the authorization
+            if is_authorized:
+                gate_status = "Authorized"
+                color = (0, 255, 0)  # Green
+            else:
+                gate_status = "Guest Car"
+                color = (0, 0, 255)  # Red
 
-            # Press 'q' to quit
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            # Draw the bounding box, license plate text, and gate status on the frame
+            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), color, 5)
+            text_x = int(x1)
+            text_y = int(y1) - 60
+            text_bg_height = 60
+            text_bg_width = max(cv2.getTextSize(license_plate_text, cv2.FONT_HERSHEY_SIMPLEX, 2, 5)[0][0],
+                               cv2.getTextSize(gate_status, cv2.FONT_HERSHEY_SIMPLEX, 2, 5)[0][0]) + 20
+            text_bg_x1 = int(x1)
+            text_bg_y1 = int(y1) - text_bg_height
+            text_bg_x2 = int(x1) + text_bg_width
+            text_bg_y2 = int(y1)
+            cv2.rectangle(frame, (text_bg_x1, text_bg_y1), (text_bg_x2, text_bg_y2), color, -1)
+            cv2.putText(frame, license_plate_text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 5)
+            text_y += 50
+            cv2.putText(frame, gate_status, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 5)
+        except Exception as e:
+            print(f"Error processing license plate: {e}")
+            continue
 
-    # Release the camera and close all windows
-    cap.release()
-    cv2.destroyAllWindows()
+    # Calculate the current FPS
+    frame_count += 1
+    current_time = time.time()
+    elapsed_time = current_time - prev_time
+    if elapsed_time >= 1:  # Update FPS every second
+        fps = frame_count / elapsed_time
+        frame_count = 0
+        prev_time = current_time
 
-if __name__ == "__main__":
-    main()
+    # Display the FPS
+    fps_text = f"FPS: {fps:.2f}"
+    cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
+
+    # Display the processed frame
+    cv2.imshow("License Plate Detection", frame)
+
+    # Check for user input
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
+        running = False
+
+# Release the camera and close the window
+cap.release()
+cv2.destroyAllWindows()

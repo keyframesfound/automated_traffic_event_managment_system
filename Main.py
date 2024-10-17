@@ -13,7 +13,7 @@ cap = cv2.VideoCapture(camera_index)
 
 CLIENT = InferenceHTTPClient(
     api_url="https://detect.roboflow.com",
-    api_key="API KEY"
+    api_key="u7DLC0ZfVDyLXmbYFpQI"
 )
 
 # Set up the thread pool for asynchronous API calls
