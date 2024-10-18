@@ -3,7 +3,6 @@ from inference_sdk import InferenceHTTPClient
 import time
 from concurrent.futures import ThreadPoolExecutor
 import pytesseract
-import csv
 
 # Prompt the user to select the camera index
 camera_index = int(input("Enter the camera index (e.g., 0 for the default camera): "))
