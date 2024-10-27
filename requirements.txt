@@ -1,3 +1,21 @@
-opencv-python==4.5.5.64
-numpy==1.21.6
+# requirements.txt
+
+# Required packages for the automated traffic event management system
+
+# OpenCV for video processing and image manipulation
+opencv-python==4.7.0.72
+
+# Inference SDK for making API calls to the Roboflow model
+inference-sdk==0.1.0
+
+# PyTesseract for optical character recognition (OCR)
 pytesseract==0.3.10
+
+# Concurrent.futures for managing asynchronous API calls
+concurrent.futures==3.12.1
+
+# Time for measuring time intervals
+time==1.0.0
+
+# CSV for reading and writing CSV files
+csv==1.0

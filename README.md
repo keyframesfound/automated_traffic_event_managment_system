@@ -66,7 +66,7 @@ Displays the video stream with the detected license plates highlighted and the e
 
 ### 🔖 Prerequisites
 
-**Python**: `version 3.12.3`
+**Python**: `version 3.8.20`
 
 ### 📦 Installation
 
@@ -74,27 +74,33 @@ Build the project from source:
 
 1. Clone the automated_traffic_event_managment_system repository:
 ```sh
-❯ git clone https://github.com/keyframesfound/automated_traffic_event_managment_system
+git clone https://github.com/keyframesfound/automated_traffic_event_managment_system
 ```
 
 2. Navigate to the project directory:
 ```sh
-❯ cd automated_traffic_event_managment_system
+cd automated_traffic_event_managment_system
 ```
 
-3. Install the required dependencies:
+2.1 For Linux Installations Only:
 ```sh
-❯ pip install -r requirements.txt
+source myenv/bin/activate
 ```
 
-### 🤖 Usage
+4. Install the required dependencies:
+```sh
+pip install -r requirements.txt
+```
+
+### 🤖 Run the script
 
 To run the project, execute the following command:
 
 ```sh
-❯ python main.py
+python3 main.py
 ```
 ---
+
 
 ## 📌 Project Roadmap
 
