@@ -37,7 +37,10 @@ while running:
 
     # Process the inference results
     for detection in results:
-        x, y, width, height = detection["box"]
+        x = float(detection["box"][0])
+        y = float(detection["box"][1])
+        width = float(detection["box"][2])
+        height = float(detection["box"][3])
         x1, y1 = int(x - width / 2), int(y - height / 2)
         x2, y2 = int(x + width / 2), int(y + height / 2)
         confidence = detection["score"]
