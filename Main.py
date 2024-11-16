@@ -15,7 +15,7 @@ cap.set(cv2.CAP_PROP_FPS, 1)
 
 CLIENT = InferenceHTTPClient(
     api_url="https://detect.roboflow.com",
-    api_key="APIKEY"
+    api_key="APIKEYmodified:   Main.py"
 )
 
 # Set up the thread pool for asynchronous API calls
