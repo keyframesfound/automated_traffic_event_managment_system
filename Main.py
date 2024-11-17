@@ -10,19 +10,19 @@ camera_index = int(input("Enter the camera index (e.g., 0 for the default camera
 # Initialize the camera
 cap = cv2.VideoCapture(camera_index)
 
-# Set the camera frame rate to 15 FPS
+# Set the camera frame rate to 1 FPS
 cap.set(cv2.CAP_PROP_FPS, 1)
 
 CLIENT = InferenceHTTPClient(
     api_url="https://detect.roboflow.com",
-    api_key="APIKEY"
+    api_key="u7DLC0ZfVDyLXmbYFpQI"
 )
 
 # Set up the thread pool for asynchronous API calls
 executor = ThreadPoolExecutor(max_workers=1)
 
-# Read the authorized license plates from a CSV file
-authorized_plates = ["LICENSE", "LICENSE", "LICENSE"]
+# Read the authorized license plates
+authorized_plates = ["DF8588", "EC412", "LICENSE"]
 
 # Initialize the EasyOCR reader
 reader = easyocr.Reader(['en'])
