@@ -3,6 +3,7 @@ import torch
 import easyocr
 import yolov5
 import numpy as np
+import json
 
 def list_available_cameras():
     """Lists all available camera indices until no camera is found."""
@@ -59,8 +60,12 @@ def put_text_with_background(img, text, position, font, font_scale, text_color, 
     cv2.putText(img, text, position, font, font_scale, text_color, thickness)
     return img
 
+# Load authorized plates from JSON file
+with open('data.json', 'r') as file:
+    config = json.load(file)
+    authorized_plates = config.get("authorized_plates", [])
+
 model = yolov5.load('keremberke/yolov5m-license-plate')
-authorized_plates = ["SZ2813", "LICENSE", "LICENSE"]
 reader = easyocr.Reader(['en'])
 confidence_threshold = 0.5
 
@@ -96,33 +101,15 @@ while True:
             license_plate_text = ''.join([line[1].upper().replace(" ", "") for line in result])
 
             is_authorized = any(
-                sum(1 for char in authorized_plate if char in license_plate_text) >= 4 
-                for authorized_plate in authorized_plates
+                sum(1 for char in plate if char in license_plate_text) == len(plate)
+                for plate in authorized_plates
             )
 
-            gate_status = "Authorized" if is_authorized else "Guest Car"
-            color = (0, 255, 0) if is_authorized else (0, 0, 255)
+            text_color = (0, 255, 0) if is_authorized else (0, 0, 255)
+            status_text = "Authorized" if is_authorized else "Not Authorized"
 
-            # Add text with background
-            frame = put_text_with_background(
-                frame, 
-                license_plate_text, 
-                (x1_orig, y1_orig - 20),
-                cv2.FONT_HERSHEY_SIMPLEX, 
-                1.2, 
-                color, 
-                3
-            )
-            
-            frame = put_text_with_background(
-                frame, 
-                gate_status, 
-                (x1_orig, y1_orig - 70),
-                cv2.FONT_HERSHEY_SIMPLEX, 
-                1.2, 
-                color, 
-                3
-            )
+            frame = put_text_with_background(frame, f"Plate: {license_plate_text}", (x1_orig, y1_orig - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, text_color, 2)
+            frame = put_text_with_background(frame, status_text, (x1_orig, y1_orig - 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, text_color, 2)
 
     cv2.imshow("License Plate Detection", frame)
 
