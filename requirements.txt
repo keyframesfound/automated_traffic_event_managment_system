@@ -2,3 +2,4 @@ opencv-python~=4.5.5.64
 easyocr~=1.7.2
 numpy==1.23.0
 opencv-python-headless==4.6.
+yolov5==1
