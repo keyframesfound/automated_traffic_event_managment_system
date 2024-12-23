@@ -4,6 +4,9 @@ import easyocr
 import yolov5
 import numpy as np
 import json
+from Levenshtein import distance
+
+
 
 def list_available_cameras():
     """Lists all available camera indices until no camera is found."""
@@ -100,10 +103,8 @@ while True:
             result = reader.readtext(license_plate, paragraph=False)
             license_plate_text = ''.join([line[1].upper().replace(" ", "") for line in result])
 
-            is_authorized = any(
-                sum(1 for char in plate if char in license_plate_text) == len(plate)
-                for plate in authorized_plates
-            )
+            max_distance = 2  # Allow up to 2 character mismatches
+            is_authorized = any(distance(license_plate_text, plate) <= max_distance for plate in authorized_plates)
 
             text_color = (0, 255, 0) if is_authorized else (0, 0, 255)
             status_text = "Authorized" if is_authorized else "Not Authorized"
