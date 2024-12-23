@@ -1,108 +1,111 @@
-# Use a pipeline as a high-level helper
-from transformers import pipeline
+import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+import json
 import cv2
-import time
-import pytesseract
-from PIL import Image
+import easyocr
+from datetime import datetime
+import random
 
-# Prompt the user to select the camera index
-camera_index = int(input("Enter the camera index (e.g., 0 for the default camera): "))
+# Initialize EasyOCR
+reader = easyocr.Reader(['en'], gpu=False)
 
-# Initialize the camera
-cap = cv2.VideoCapture(camera_index)
+# Initialize camera
+cam = cv2.VideoCapture(0)
+cv2.namedWindow("cam")
 
-# Load the pre-trained model
-pipe = pipeline("object-detection", model="nickmuchi/yolos-small-finetuned-license-plate-detection")
+# Constants
+threshold = 0.25
+DATA_FILE = 'data.json'
 
-# Read the authorized license plates from a CSV file
-authorized_plates = ["LICENSE", "LICENSE", "LICENSE"]
+def init_database():
+    """Initialize the database file if it doesn't exist"""
+    if not os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'w') as f:
+            json.dump([], f)
 
-running = True
-frame_count = 0
-start_time = time.time()
-prev_time = start_time
-fps = 0.0  # Initialize the fps variable
+def getRandomCharge():
+    """Generate random parking charge"""
+    charges = [100, 200, 300, 400, 500]
+    return charges[random.randint(0, len(charges) - 1)]
 
-while running:
-    # Capture a single frame from the camera
-    ret, frame = cap.read()
-    if not ret:
-        break
+def load_data():
+    """Load data from JSON file"""
+    try:
+        with open(DATA_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return []
 
-    # Convert the frame to a PIL image
-    image = Image.fromarray(frame)
+def save_data(data):
+    """Save data to JSON file"""
+    with open(DATA_FILE, 'w') as f:
+        json.dump(data, f, indent=4)
 
-    # Run object detection on the frame using the pipeline
-    results = pipe(image)
+def check(vehicleNo, score):
+    """Check vehicle and manage database"""
+    if vehicleNo.startswith('MH') and len(vehicleNo) >= 8:
+        data = load_data()
 
-    # Process the inference results
-    for detection in results:
-        x = float(detection["box"][0])
-        y = float(detection["box"][1])
-        width = float(detection["box"][2])
-        height = float(detection["box"][3])
-        x1, y1 = int(x - width / 2), int(y - height / 2)
-        x2, y2 = int(x + width / 2), int(y + height / 2)
-        confidence = detection["score"]
-        label = detection["label"]
+        # Check if vehicle exists
+        existing_vehicle = None
+        for entry in data:
+            if entry['vehicleNo'] == vehicleNo:
+                existing_vehicle = entry
+                break
 
-        # Draw the bounding box
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 5)
-
-        # Extract the license plate region
-        license_plate = frame[y1:y2, x1:x2]
-
-        # Perform OCR on the license plate region
-        license_plate_text = pytesseract.image_to_string(license_plate, config='--oem 3 --psm 6')
-        license_plate_text = license_plate_text.strip().upper().replace(" ", "")
-
-        # Check if the license plate contains at least 4 out of the 5 characters in any of the authorized plates
-        is_authorized = any(sum(1 for char in authorized_plate if char in license_plate_text) >= 4 for authorized_plate in authorized_plates)
-
-        # Determine the gate status based on the authorization
-        if is_authorized:
-            gate_status = "Authorized"
-            color = (0, 255, 0)  # Green
+        if not existing_vehicle:
+            print("New vehicle. Adding to database:", vehicleNo, score)
+            now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            charge = getRandomCharge()
+            new_entry = {
+                'vehicleNo': vehicleNo,
+                'time': now,
+                'charge': charge,
+                'paid': False
+            }
+            data.append(new_entry)
+            save_data(data)
+            return False
         else:
-            gate_status = "Guest Car"
-            color = (0, 0, 255)  # Red
+            print("Vehicle already in database")
+            return True
 
-        # Draw the license plate text and gate status on the frame
-        text_x = x1
-        text_y = y1 - 60
-        text_bg_height = 60
-        text_bg_width = max(cv2.getTextSize(license_plate_text, cv2.FONT_HERSHEY_SIMPLEX, 2, 5)[0][0],
-                           cv2.getTextSize(gate_status, cv2.FONT_HERSHEY_SIMPLEX, 2, 5)[0][0]) + 20
-        text_bg_x1 = x1
-        text_bg_y1 = y1 - text_bg_height
-        text_bg_x2 = x1 + text_bg_width
-        text_bg_y2 = y1
-        cv2.rectangle(frame, (text_bg_x1, text_bg_y1), (text_bg_x2, text_bg_y2), color, -1)
-        cv2.putText(frame, license_plate_text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 5)
-        text_y += 50
-        cv2.putText(frame, gate_status, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 5)
+    return False
 
-    # Calculate the current FPS
-    frame_count += 1
-    current_time = time.time()
-    elapsed_time = current_time - prev_time
-    if elapsed_time >= 1:  # Update FPS every second
-        fps = frame_count / elapsed_time
-        frame_count = 0
-        prev_time = current_time
+def start_cam():
+    """Main camera loop"""
+    while True:
+        ret, frame = cam.read()
+        if not ret:
+            continue
 
-    # Display the FPS
-    fps_text = f"FPS: {fps:.2f}"
-    cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
+        frame = cv2.resize(frame, (450, 450))
+        text_ = reader.readtext(frame)
 
-    # Display the processed frame
-    cv2.imshow("License Plate Detection", frame)
+        for t_, t in enumerate(text_):
+            bbox, text, score = t
 
-    # Check for user input
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord('q'):
-        running = False
+            if score > threshold:
+                try:
+                    vehicle_exists = check(text, score)
+                    color = (0, 255, 0) if vehicle_exists else (0, 0, 255)
 
-# Release the camera and close the window
-cap.release()
-cv2.destroyAllWindows()
+                    cv2.putText(
+                        frame, text, (int(bbox[0][0]), int(bbox[0][1])),
+                        cv2.FONT_HERSHEY_COMPLEX, 0.65, color, 2)
+                except Exception as e:
+                    print(f"Error displaying text: {e}")
+
+        cv2.imshow("cam", frame)
+
+        k = cv2.waitKey(1)
+        if k == ord('q'):
+            print("q pressed, quitting...")
+            break
+
+    cam.release()
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    init_database()
+    start_cam()
