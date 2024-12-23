@@ -139,5 +139,5 @@ This project is licensed under the MIT License.
 - [automatic-number-plate-recognition-python-yolov8](https://github.com/computervisioneng/automatic-number-plate-recognition-python-yolov8)
 - [Car-Number-Plate-Recognition-Sysytem](https://github.com/hasaan21/Car-Number-Plate-Recognition-Sysytem/tree/master)
 - [DetectCarDistanceAndRoadLane](https://github.com/ablanco1950/DetectCarDistanceAndRoadLane)
-
+- [Huggingface Model](https://huggingface.co/keremberke/yolov5m-license-plate)
 ---
