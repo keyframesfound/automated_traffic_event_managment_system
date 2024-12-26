@@ -67,7 +67,7 @@ Displays the video stream with the detected license plates highlighted and the e
 <pre><code class="lang-sh"><span class="hljs-keyword">source</span> myenv<span class="hljs-regexp">/bin/</span>activate
 </code></pre>
 <ol>
-<li>Install the required dependencies:<pre><code class="lang-sh">pip <span class="hljs-keyword">install</span> -r requirements.txt
+<li>Everyone loves a one command install:<pre><code class="lang-sh">pip <span class="hljs-keyword">install</span> opencv-python torch easyocr yolov5 numpy flask python-Levenshtein
 </code></pre>
 </li>
 </ol>
