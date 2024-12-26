@@ -25,7 +25,6 @@
     - [📦 Installation](#-installation)
     - [🤖 Usage](#-usage)
 - [📌 Project Roadmap](#-project-roadmap)
-- [🤝 Contributing](#-contributing)
 - [🎗 License](#-license)
 - [🙌 Acknowledgments](#-acknowledgments)
 
@@ -43,7 +42,7 @@ Originally, this project was aimed at helping solve the ongoing traffic manageme
 Automatically detects available camera sources on the system.
 Allows the user to select a camera source for license plate detection.
 Utilizes the Haar Cascade classifier for Russian license plate detection.
-Extracts the text from the detected license plates using the Tesseract OCR engine.
+Extracts the text from the detected license plates using the EasyOCR engine.
 Displays the video stream with the detected license plates highlighted and the extracted text displayed.
 
 ---
@@ -97,7 +96,7 @@ pip install -r requirements.txt
 To run the project, execute the following command:
 
 ```sh
-python3 main.py
+python3 Main.py
 ```
 ---
 
@@ -111,23 +110,6 @@ python3 main.py
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Here are several ways you can contribute:
-
-- **[Report Issues](https://github.com/keyframesfound/ssc-plateschecker/issues)**: Submit bugs found or log feature requests for the `ssc-plateschecker` project.
-- **[Join the Discussions](https://github.com/keyframesfound/ssc-plateschecker/discussions)**: Share your insights, provide feedback, or ask questions.
-
-<summary>Contributor Graph</summary>
-<br>
-<p align="left">
-   <a href="https://github.com{/keyframesfound/ssc-plateschecker/}graphs/contributors">
-      <img src="https://contrib.rocks/image?repo=keyframesfound/ssc-plateschecker">
-   </a>
-</p>
-</details>
-
----
 
 ## 🎗 License
 This project is licensed under the MIT License.
