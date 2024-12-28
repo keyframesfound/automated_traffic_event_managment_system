@@ -7,6 +7,7 @@ import json
 from Levenshtein import distance
 from flask import Flask, Response
 import socket
+import time
 
 app = Flask(__name__)
 
@@ -84,6 +85,7 @@ cap = cv2.VideoCapture(camera_index)
 
 def generate_frames():
     while True:
+        start_time = time.time()
         ret, frame = cap.read()
         if not ret:
             break
@@ -119,6 +121,11 @@ def generate_frames():
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+        # Control frame rate
+        elapsed_time = time.time() - start_time
+        sleep_time = max(1./30 - elapsed_time, 0)  # Aim for 30 FPS
+        time.sleep(sleep_time)
 
 @app.route('/video_feed')
 def video_feed():
